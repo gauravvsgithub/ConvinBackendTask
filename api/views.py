@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import redirect
 
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import InstalledAppFlow, Flow
+import googleapiclient.discovery
 
 
 @api_view(['GET'])
@@ -14,8 +15,34 @@ def getData(request):
 
 @api_view(['GET'])
 def GoogleCalendarRedirectView(request):
-    item = {'message': 'Calendar Redirect View'}
-    return Response(item)
+    secrets_file = './client_secret.json'
+    scopes = ['https://www.googleapis.com/auth/calendar']
+    redirect_uri = 'https://convinbackendtask.geekgaurav.repl.co/rest/v1/calendar/redirect/'
+    state = request.session['state']
+
+    flow = Flow.from_client_secrets_file(secrets_file,
+                                         scopes,
+                                         state=state,
+                                         redirect_uri=redirect_uri)
+
+    code = request.query_params.get('code')
+    flow.fetch_token(code=code)
+
+    credentials = flow.credentials
+    service = googleapiclient.discovery.build('calendar',
+                                              'v3',
+                                              credentials=credentials,
+                                              static_discovery=False)
+
+    # Get the user's events from the calendar API
+    events_result = service.events().list(calendarId='primary',
+                                          maxResults=10,
+                                          singleEvents=True,
+                                          orderBy='startTime').execute()
+    events = events_result.get('items', [])
+
+    # Render the events in the response
+    return Response(events)
 
 
 @api_view(['GET'])
