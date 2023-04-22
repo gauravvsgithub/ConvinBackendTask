@@ -21,5 +21,5 @@ pip install - r requriments.txt
 
 ## Important
 ``` 
-You'll need to create account on Google Cloud Console(needs google account), and mention your email in testers as this app is not deployed.
+You'll need to create account on Google Cloud Console(needs google account), create project and mention your email in testers as this app is not deployed.
 ```
