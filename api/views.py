@@ -18,7 +18,7 @@ def GoogleCalendarRedirectView(request):
     secrets_file = './client_secret.json'
     scopes = ['https://www.googleapis.com/auth/calendar']
     redirect_uri = 'https://convinbackendtask.geekgaurav.repl.co/rest/v1/calendar/redirect/'
-    state = request.session['state']
+    state = request.query_params.get('state')
 
     flow = Flow.from_client_secrets_file(secrets_file,
                                          scopes,
